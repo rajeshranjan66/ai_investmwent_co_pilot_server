@@ -1,0 +1,30 @@
+services:
+  mcp-server:
+    build: .
+    container_name: mcp-stock-server-http
+    ports:
+      - "8000:8000"
+    environment:
+      - ALPHA_VANTAGE_API_KEY=${ALPHA_VANTAGE_API_KEY}
+      - ENVIRONMENT=development
+      - PYTHONUNBUFFERED=1  # Add this for better logging
+    volumes:
+      - .:/app
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8000/tools/health_check || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - mcp-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  mcp-network:
+    driver: bridge
